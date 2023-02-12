@@ -45,7 +45,8 @@ def isSegmentsIntersect(pointA: Point, pointB: Point, pointC: Point, pointD: Poi
         # Точка D лежит на отрезке AB?
         sc3 = scalarProduct(pointD - pointA, pointD - pointB)
 
-        if sc1 < 0 or sc2 < 0 or sc3 < 0:
+        # Равенство - точки совпадают
+        if sc1 <= 0 or sc2 <= 0 or sc3 <= 0:
             return True
     elif det1 * det2 <= 0 and det3 * det4 <= 0:
         return True

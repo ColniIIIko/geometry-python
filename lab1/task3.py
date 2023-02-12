@@ -24,7 +24,6 @@ def isComplexPolygon(polygon: Polygon) -> bool:
         pointA = polygon.points[i % len(polygon.points)]
         pointB = polygon.points[(i + 1) % len(polygon.points)]
         for j in range(i + 2, len(polygon.points)):
-            iterations += 1
             if (j + 1) % len(polygon.points) == i:
                 continue
             pointC = polygon.points[j % len(polygon.points)]
