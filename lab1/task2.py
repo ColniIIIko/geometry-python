@@ -4,6 +4,7 @@ from shared.point import Point
 from shared.vector import Vector
 from shared.colors import COLORS
 from task1 import determinePosition
+from shared.drawers import drawPoint, drawLine
 
 # Task 2
 # Conditions
@@ -18,22 +19,6 @@ screen = pygame.display.set_mode((800, 600))
 pygame.display.set_caption("Lab 1 - Task 2")
 
 
-def drawPoint(surface: pygame.Surface, point: Point, color: tuple):
-    pygame.draw.circle(surface, color, (point.x, point.y), 5)
-    renderText(surface, point.caption, Vector(point.x, point.y), color)
-
-
-def drawLine(surface: pygame.Surface, point1: Point, point2: Point, color: tuple):
-    pygame.draw.line(surface, color, (point1.x, point1.y),
-                     (point2.x, point2.y), 1)
-
-
-def renderText(surface: pygame.Surface, text: str, position: Vector, color: tuple):
-    font = pygame.font.SysFont("Arial", 20)
-    text = font.render(text, True, color)
-    surface.blit(text, position.toList())
-
-
 def scalarProduct(vectorA: Vector, vectorB: Vector):
     """
     Computes the scalar product of two vectors.
@@ -41,15 +26,17 @@ def scalarProduct(vectorA: Vector, vectorB: Vector):
     return np.dot(vectorA.toList(), vectorB.toList())
 
 
-def isSegmentsIntersect(pointA: Point, pointB: Point, pointC: Point, pointD: Point):
+def isSegmentsIntersect(pointA: Point, pointB: Point, pointC: Point, pointD: Point) -> bool:
+    """
+    Determines if the segments AB and CD intersect.
+    """
     det1 = determinePosition(pointA, pointC, pointD)
     det2 = determinePosition(pointB, pointC, pointD)
     det3 = determinePosition(pointC, pointA, pointB)
     det4 = determinePosition(pointD, pointA, pointB)
 
     if det1 == 0 and det2 == 0 and det3 == 0 and det4 == 0:
-        # Значит точки лежат на прямой
-        # Проверяем, что бы отрезки накладывались друг на друга
+        # EDGE CASE: Отрезки лежат на одной прямой
 
         # Точка A лежит на отрезке CD?
         sc1 = scalarProduct(pointC - pointA, pointD - pointA)
@@ -60,7 +47,6 @@ def isSegmentsIntersect(pointA: Point, pointB: Point, pointC: Point, pointD: Poi
 
         if sc1 < 0 or sc2 < 0 or sc3 < 0:
             return True
-
     elif det1 * det2 <= 0 and det3 * det4 <= 0:
         return True
 
