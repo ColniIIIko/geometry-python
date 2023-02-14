@@ -10,10 +10,31 @@ from shared.drawers import drawPoint, drawPolygon
 from shared.colors import COLORS
 
 
+def testDimensional(point: Point, polygon: list[Point]) -> bool:
+    xList = [point.x for point in polygon]
+    xMax = np.max(xList)
+    xMin = np.min(xList)
+
+    yList = [point.y for point in polygon]
+    yMax = np.max(yList)
+    yMin = np.min(yList)
+
+    if point.x < xMin or point.x > xMax or point.y < yMin or point.y > yMax:
+        return True
+    else:
+        return False
+
+
 def isPointInPolygon(point: Point, polygon: list[Point]) -> bool:
-    # Бесконечно удаленная точка
-    INFINITE_POINT = Point(1000000000, point.y)
+
+    if testDimensional(point, polygon):
+        return False
+
+    xMin = np.min([point.x for point in polygon])
+    pointQ = Point(xMin - 1, point.y)
+
     # Проверяем, что бы точка не лежала на одной из сторон многоугольника
+
     for i in range(len(polygon)):
         pointA = polygon[i]
         pointB = polygon[(i + 1) % len(polygon)]
@@ -24,12 +45,50 @@ def isPointInPolygon(point: Point, polygon: list[Point]) -> bool:
     # Проверяем, что бы точка лежала внутри многоугольника
     # Для этого строим отрезок от точки до бесконечности и считаем количество пересечений с отрезками многоугольника
     # Если количество пересечений нечетное, то точка лежит внутри многоугольника
+    segmentCD = Segment(point, pointQ)
     count = 0
     for i in range(len(polygon)):
         segmentAB = Segment(polygon[i], polygon[(i + 1) % len(polygon)])
-        segmentCD = Segment(point, INFINITE_POINT)
         if Segment.isIntersects(segmentAB, segmentCD):
-            count += 1
+            if (not segmentCD.isPointLie(polygon[i]) and not segmentCD.isPointLie(polygon[(i + 1) % len(polygon)])):
+                count += 1
+            else:
+                if segmentCD.isPointLie(polygon[i]):
+                    j = i - 1
+                    while segmentCD.isPointLie(polygon[j]):
+                        j -= 1
+                        if j < 0:
+                            j += len(polygon)
+                    k = i + 1
+                    while segmentCD.isPointLie(polygon[k]):
+                        k += 1
+                        if k >= len(polygon):
+                            k -= len(polygon)
+                    pointK = polygon[k]
+                    pointJ = polygon[j]
+                    pointKPosition = segmentCD.determinePosition(pointK)
+                    pointJPosition = segmentCD.determinePosition(pointJ)
+                    if (pointKPosition*pointJPosition <= 0):
+                        count += 1
+                    i = k
+                elif segmentCD.isPointLie(polygon[(i+1) % len(polygon)]):
+                    j = i
+                    while segmentCD.isPointLie(polygon[j]):
+                        j -= 1
+                        if j < 0:
+                            j += len(polygon)
+                    k = i + 2
+                    while segmentCD.isPointLie(polygon[k]):
+                        k += 1
+                        if k >= len(polygon):
+                            k -= len(polygon)
+                    pointK = polygon[k]
+                    pointJ = polygon[j]
+                    pointKPosition = segmentCD.determinePosition(pointK)
+                    pointJPosition = segmentCD.determinePosition(pointJ)
+                    if (pointKPosition*pointJPosition <= 0):
+                        count += 1
+                    i = k
 
     return count % 2 == 1
 

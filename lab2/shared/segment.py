@@ -48,3 +48,6 @@ class Segment:
         A0Vector = point - self.start
         det = np.linalg.det([A0Vector.toList(), ABVector.toList()])
         return det
+
+    def isPointLie(self, point: Point) -> bool:
+        return Vector.scalarProduct(self.start - point, self.end - point) <= 0 and self.determinePosition(point) == 0
