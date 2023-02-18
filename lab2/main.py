@@ -10,7 +10,7 @@ from shared.drawers import drawPoint, drawPolygon
 from shared.colors import COLORS
 
 
-def testDimensional(point: Point, polygon: list[Point]) -> bool:
+def getDimensions(polygon: list[Point]) -> tuple[float, float, float, float]:
     xList = [point.x for point in polygon]
     xMax = np.max(xList)
     xMin = np.min(xList)
@@ -19,76 +19,57 @@ def testDimensional(point: Point, polygon: list[Point]) -> bool:
     yMax = np.max(yList)
     yMin = np.min(yList)
 
+    return xMin, xMax, yMin, yMax
+
+
+def isLieInRectangle(point: Point, xMin: float, xMax: float, yMin: float, yMax: float) -> bool:
     if point.x < xMin or point.x > xMax or point.y < yMin or point.y > yMax:
-        return True
+        return False
     else:
+        return True
+
+
+def isPointInsidePolygon(point: Point, polygon: list[Point]) -> bool:
+    xMin, xMax, yMin, yMax = getDimensions(polygon)
+    if not isLieInRectangle(point, xMin, xMax, yMin, yMax):
         return False
 
-
-def isPointInPolygon(point: Point, polygon: list[Point]) -> bool:
-
-    if testDimensional(point, polygon):
-        return False
-
-    xMin = np.min([point.x for point in polygon])
-    pointQ = Point(xMin - 1, point.y)
-
-    # Проверяем, что бы точка не лежала на одной из сторон многоугольника
-
-    for i in range(len(polygon)):
-        pointA = polygon[i]
-        pointB = polygon[(i + 1) % len(polygon)]
-
-        if Segment(pointA, pointB).determinePosition(point) == 0:
-            return False
-
-    # Проверяем, что бы точка лежала внутри многоугольника
-    # Для этого строим отрезок от точки до бесконечности и считаем количество пересечений с отрезками многоугольника
-    # Если количество пересечений нечетное, то точка лежит внутри многоугольника
-    segmentCD = Segment(point, pointQ)
+    rayFromPoint = Segment(point, Point(xMin - 1, point.y))
     count = 0
     for i in range(len(polygon)):
         segmentAB = Segment(polygon[i], polygon[(i + 1) % len(polygon)])
-        if Segment.isIntersects(segmentAB, segmentCD):
-            if (not segmentCD.isPointLie(polygon[i]) and not segmentCD.isPointLie(polygon[(i + 1) % len(polygon)])):
+        if Segment.isIntersects(segmentAB, rayFromPoint):
+            if (not rayFromPoint.isPointLie(polygon[i]) and not rayFromPoint.isPointLie(polygon[(i + 1) % len(polygon)])):
                 count += 1
             else:
-                if segmentCD.isPointLie(polygon[i]):
+                j = 0
+                k = 0
+                if rayFromPoint.isPointLie(polygon[i]):
                     j = i - 1
-                    while segmentCD.isPointLie(polygon[j]):
-                        j -= 1
-                        if j < 0:
-                            j += len(polygon)
                     k = i + 1
-                    while segmentCD.isPointLie(polygon[k]):
-                        k += 1
-                        if k >= len(polygon):
-                            k -= len(polygon)
-                    pointK = polygon[k]
-                    pointJ = polygon[j]
-                    pointKPosition = segmentCD.determinePosition(pointK)
-                    pointJPosition = segmentCD.determinePosition(pointJ)
-                    if (pointKPosition*pointJPosition <= 0):
-                        count += 1
-                    i = k
-                elif segmentCD.isPointLie(polygon[(i+1) % len(polygon)]):
+
+                elif rayFromPoint.isPointLie(polygon[(i + 1) % len(polygon)]):
                     j = i
-                    while segmentCD.isPointLie(polygon[j]):
-                        j -= 1
-                        if j < 0:
-                            j += len(polygon)
                     k = i + 2
-                    while segmentCD.isPointLie(polygon[k]):
-                        k += 1
-                        if k >= len(polygon):
-                            k -= len(polygon)
-                    pointK = polygon[k]
-                    pointJ = polygon[j]
-                    pointKPosition = segmentCD.determinePosition(pointK)
-                    pointJPosition = segmentCD.determinePosition(pointJ)
-                    if (pointKPosition*pointJPosition <= 0):
-                        count += 1
-                    i = k
+
+                while rayFromPoint.isPointLie(polygon[j]):
+                    # Ищем ближайшую из предыдущих вершин, которая не лежит на отрезке
+                    j -= 1
+                    if j < 0:
+                        j += len(polygon)
+                while rayFromPoint.isPointLie(polygon[k]):
+                    # Ищем ближайшую из следующих вершин, которая не лежит на отрезке
+                    k += 1
+                    if k >= len(polygon):
+                        k -= len(polygon)
+                pointK = polygon[k]
+                pointJ = polygon[j]
+                pointKPosition = rayFromPoint.determinePosition(pointK)
+                pointJPosition = rayFromPoint.determinePosition(pointJ)
+                if (pointKPosition * pointJPosition <= 0):
+                    # Если две точки лежат по разные стороны от отрезка, то учитываем пересечение
+                    count += 1
+                i = k
 
     return count % 2 == 1
 
@@ -112,14 +93,13 @@ if __name__ == "__main__":
         Point(250, 300, "p10"),
         Point(150, 150, "p11"),
         Point(100, 300, "p12"),
-
     ]
-    point = Point(460, 150, "p0")
+    point = Point(250, 240, "p0")
 
     drawPolygon(screen, polygon, COLORS["BLACK"])
     drawPoint(screen, point, COLORS["RED"])
 
-    if isPointInPolygon(point, polygon):
+    if isPointInsidePolygon(point, polygon):
         print("Точка лежит внутри многоугольника")
     else:
         print("Точка не лежит внутри многоугольника")

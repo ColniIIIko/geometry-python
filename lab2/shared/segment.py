@@ -14,6 +14,9 @@ class Segment:
 
     @staticmethod
     def isIntersects(segment1: Segment, segment2: Segment) -> bool:
+        """
+        Определяет, пересекаются ли отрезки
+        """
         pointA = segment1.start
         pointB = segment1.end
         pointC = segment2.start
@@ -43,11 +46,17 @@ class Segment:
 
         return False
 
-    def determinePosition(self, point: Point):
+    def determinePosition(self, point: Point) -> float:
+        """
+        Определяет положение точки относительно текущего отрезка
+        """
         ABVector = self.end - self.start
         A0Vector = point - self.start
         det = np.linalg.det([A0Vector.toList(), ABVector.toList()])
         return det
 
     def isPointLie(self, point: Point) -> bool:
+        """
+        Проверят, лежит ли точка на отрезке (включая концы)
+        """
         return Vector.scalarProduct(self.start - point, self.end - point) <= 0 and self.determinePosition(point) == 0
