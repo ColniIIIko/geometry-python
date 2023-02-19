@@ -12,6 +12,9 @@ class Segment:
         self.start = start
         self.end = end
 
+    def toVector(self):
+        return Vector(self.end.x - self.start.x, self.end.y - self.start.y)
+
     @staticmethod
     def isIntersects(segment1: Segment, segment2: Segment) -> bool:
         """

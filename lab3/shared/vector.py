@@ -4,7 +4,25 @@ import numpy as np
 
 
 class Vector:
-    def __init__(self, x, y):
+    def __init__(self, x: float, y: float):
+        self.x = x
+        self.y = y
+
+    def add(self, other: Vector) -> None:
+        self.x += other.x
+        self.y += other.y
+
+    def clear(self):
+        self.x = 0
+        self.y = 0
+
+    def reflect(self, segment) -> None:
+        segmentVector: Vector = segment.toVector()
+        kf = 2 * Vector.scalarProduct(self,
+                                      segmentVector) / Vector.scalarProduct(segmentVector, segmentVector)
+
+        x, y = kf * segmentVector.x - self.x, kf * segmentVector.y - self.y
+
         self.x = x
         self.y = y
 
@@ -63,3 +81,4 @@ class Vector:
             return 7
         if -x <= y < 0:
             return 8
+        return 0

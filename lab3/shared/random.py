@@ -26,5 +26,5 @@ def generateRandomPoint(minX: int, maxX: int, minY: int, maxY: int, index: int =
     return Point(
         random.randint(minX, maxX),
         random.randint(minY, maxY),
-        "g" + str(index) if index is not None else None
+        # "g" + str(index) if index is not None else None
     )
