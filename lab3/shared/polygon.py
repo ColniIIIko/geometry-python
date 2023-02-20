@@ -1,5 +1,6 @@
 from .point import Point
 from .segment import Segment
+from .dimensions import dimensionalTest
 
 
 class Polygon:
@@ -12,6 +13,8 @@ class Polygon:
         return f"Polygon({self.points})"
 
     def contains(self, point: Point):
+        if not dimensionalTest(point, self.points):
+            return False
         polygon = self.points
         octanSum = 0
         for i in range(len(polygon)):

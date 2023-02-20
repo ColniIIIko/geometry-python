@@ -5,7 +5,12 @@ from .vector import Vector
 
 def drawPoint(surface: pygame.Surface, point: Point, color: tuple):
     pygame.draw.circle(surface, color, (point.x, point.y), 5)
-    renderText(surface, point.caption, Vector(point.x, point.y), color)
+    text = ""
+    try:
+        text = point.caption
+    except:
+        pass
+    renderText(surface, text, Vector(point.x, point.y), color)
 
 
 def drawLine(surface: pygame.Surface, point1: Point, point2: Point, color: tuple):

@@ -48,38 +48,19 @@ def angle(p0: Point, pI: Point, pIPlus: Point):
     return pureAngle
 
 
-def isPointInsideConvexPolygon(point: Point, polygon: list[Point]) -> bool:
-    n = len(polygon)
-    pointZ = (polygon[0] + polygon[n // 2]) / 2
-    print(pointZ)
-    polygonWithAppendedPoint = [p for p in polygon]
-    polygonWithAppendedPoint.append(polygonWithAppendedPoint[0])
-    start = 1
-    end = n + 1
-    while (end - start > 1):
-        center = (start + end) // 2
-        if angle(polygon[0], pointZ, point) < angle(polygon[0], pointZ, polygon[center]):
-            end = center
-        else:
-            start = center
-    print("Start ", start, "End", end)
-    return not Segment.isIntersects(Segment(polygon[start], polygon[end]), Segment(point, pointZ))
-
-
 if __name__ == "__main__":
     pygame.init()
-    screen = pygame.display.set_mode((800, 600))
+    screen = pygame.display.set_mode((800, 800))
     pygame.display.set_caption("Lab 3")
-    screen.fill(COLORS["WHITE"])
 
     convexPolygonPoints = [
         Point(600, 453, "p0"),
         Point(414, 497, "p1"),
         Point(196, 446, "p2"),
-        Point(62, 325, "p3"),
-        Point(120, 84, "p4"),
-        Point(540, 48, "p5"),
-        Point(600, 360, "p6"),
+        Point(62, 285, "p3"),
+        Point(180, 84, "p4"),
+        Point(600, 48, "p5"),
+        Point(620, 360, "p6"),
     ]
 
     convexPolygon = ConvexPolygon(convexPolygonPoints)
@@ -96,12 +77,11 @@ if __name__ == "__main__":
 
     simplePolygon = Polygon(simplePolygonPoints)
 
-    POINT_COUNT = 256
+    POINT_COUNT = 100
     points = rand_utils.generateRandomPoints(POINT_COUNT, 0, 800, 0, 600)
 
     CORRECT_POINTS = [point for point in points if convexPolygon.contains(
         point) and not simplePolygon.contains(point)]
-
     velocities = [rand_utils.generateRandomVelocity() for _ in CORRECT_POINTS]
 
     while True:
@@ -116,21 +96,23 @@ if __name__ == "__main__":
 
         drawPolygon(screen, convexPolygonPoints, COLORS["BLUE"])
         drawPolygon(screen, simplePolygonPoints, COLORS["RED"])
-        pygame.display.update()
-
         n = len(convexPolygonPoints)
 
         for point, velocity in zip(CORRECT_POINTS, velocities):
             if simplePolygon.contains(point):
                 velocity.clear()
             # TODO: Bug - some points can get out from Polygon
-            if not convexPolygon.contains(point):
+
+            predictedPoint = point + velocity
+
+            if not convexPolygon.contains(predictedPoint):
                 for i in range(n):
                     segment = Segment(
                         convexPolygonPoints[i], convexPolygonPoints[(i + 1) % n])
 
                     if segment.determinePosition(point) <= 0:
                         velocity.reflect(segment)
-                        continue
 
             point.add(velocity)
+
+        pygame.display.update()

@@ -12,31 +12,24 @@ def angle(p0: Point, pI: Point, pIPlus: Point):
 
 
 class ConvexPolygon(Polygon):
+    # TODO: Must be implemented
     # def contains(self, point: Point):
-    #     # TODO: Must be fixed, now have IndexError
     #     polygon = self.points
     #     n = len(polygon)
-    #     pointZ = (polygon[0] + polygon[n // 2]) / 2
-    #     print("Point in polygon: ", pointZ)
-    #     print("Source point: ", point)
+    #     pointZ = (polygon[n // 2] + polygon[0]) / 2
+
     #     polygonWithAppendedPoint = [p for p in polygon]
     #     polygonWithAppendedPoint.append(polygonWithAppendedPoint[0])
-    #     print(polygonWithAppendedPoint)
-    #     start = 1
+    #     point1 = polygon[0]
+    #     start = 0
     #     end = n
     #     while (end - start > 1):
-    #         center = (start + end) // 2
-    #         print("Center is ", center)
-    #         if angle(polygonWithAppendedPoint[0], pointZ, point) < angle(polygonWithAppendedPoint[0], pointZ, polygonWithAppendedPoint[center]):
+    #         center = int((start + end) / 2)
+    #         if angle(point1, pointZ, point) < angle(point1, pointZ, polygonWithAppendedPoint[center]):
     #             end = center
     #         else:
     #             start = center
-
     #     print(start, end)
-    #     return not Segment.isIntersects(
-    #         Segment(polygonWithAppendedPoint[start],
-    #                 polygonWithAppendedPoint[end]),
-    #         Segment(point, pointZ)
-    #     )
+    #     return angle(polygonWithAppendedPoint[start], polygonWithAppendedPoint[end], point) < 0
 
     pass
