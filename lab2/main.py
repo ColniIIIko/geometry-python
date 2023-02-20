@@ -11,6 +11,9 @@ from shared.colors import COLORS
 
 
 def getDimensions(polygon: list[Point]) -> tuple[float, float, float, float]:
+    """
+    Возвращает "габариты" указанного многоугольника
+    """
     xList = [point.x for point in polygon]
     xMax = np.max(xList)
     xMin = np.min(xList)
@@ -23,6 +26,9 @@ def getDimensions(polygon: list[Point]) -> tuple[float, float, float, float]:
 
 
 def isLieInRectangle(point: Point, xMin: float, xMax: float, yMin: float, yMax: float) -> bool:
+    """
+    Проверяет, лежит ли точка внутри указанного прямоугольника
+    """
     if point.x < xMin or point.x > xMax or point.y < yMin or point.y > yMax:
         return False
     else:
@@ -30,6 +36,13 @@ def isLieInRectangle(point: Point, xMin: float, xMax: float, yMin: float, yMax: 
 
 
 def isPointInsidePolygon(point: Point, polygon: list[Point]) -> bool:
+    """
+    Проверяет принадлежность точки многоугольнику
+
+    Алгоритмы:
+    - Габаритный тест O(n)
+    - Лучевой тест O(n)
+    """
     xMin, xMax, yMin, yMax = getDimensions(polygon)
     if not isLieInRectangle(point, xMin, xMax, yMin, yMax):
         return False
@@ -94,7 +107,7 @@ if __name__ == "__main__":
         Point(150, 150, "p11"),
         Point(100, 300, "p12"),
     ]
-    point = Point(250, 240, "p0")
+    point = Point(250, 150, "p0")
 
     drawPolygon(screen, polygon, COLORS["BLACK"])
     drawPoint(screen, point, COLORS["RED"])

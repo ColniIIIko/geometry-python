@@ -60,3 +60,6 @@ class Segment:
         Проверят, лежит ли точка на отрезке (включая концы)
         """
         return Vector.scalarProduct(self.start - point, self.end - point) <= 0 and self.determinePosition(point) == 0
+
+    def __str__(self) -> str:
+        return f"Segment(start={self.start}, end={self.end})"
