@@ -51,39 +51,42 @@ def isPointInsidePolygon(point: Point, polygon: list[Point]) -> bool:
     count = 0
     for i in range(len(polygon)):
         segmentAB = Segment(polygon[i], polygon[(i + 1) % len(polygon)])
-        if Segment.isIntersects(segmentAB, rayFromPoint):
-            if (not rayFromPoint.isPointLie(polygon[i]) and not rayFromPoint.isPointLie(polygon[(i + 1) % len(polygon)])):
+        if Segment.isIntersects(segmentAB, rayFromPoint) and not rayFromPoint.isPointLie(polygon[i]) and not rayFromPoint.isPointLie(polygon[(i + 1) % len(polygon)]):
+            count += 1
+        elif rayFromPoint.isPointLie(polygon[i]) or not rayFromPoint.isPointLie(polygon[(i + 1) % len(polygon)]):
+            j = 0
+            k = 0
+
+            if rayFromPoint.isPointLie(polygon[i]):
+                j = i - 1
+                if j < 0:
+                    j += len(polygon)
+                k = (i + 1) % len(polygon)
+
+            if rayFromPoint.isPointLie(polygon[(i + 1) % len(polygon)]) and not rayFromPoint.isPointLie(polygon[i]):
+                j = i
+                k = (i + 2) % len(polygon)
+
+            while rayFromPoint.isPointLie(polygon[j]):
+                # Ищем ближайшую из предыдущих вершин, которая не лежит на отрезке
+                j -= 1
+                if j < 0:
+                    j += len(polygon)
+
+            while rayFromPoint.isPointLie(polygon[k]):
+                # Ищем ближайшую из следующих вершин, которая не лежит на отрезке
+                k += 1
+                if k >= len(polygon):
+                    k -= len(polygon)
+
+            pointK = polygon[k]
+            pointJ = polygon[j]
+            pointKPosition = rayFromPoint.determinePosition(pointK)
+            pointJPosition = rayFromPoint.determinePosition(pointJ)
+            if (pointKPosition * pointJPosition <= 0):
+                # Если две точки лежат по разные стороны от отрезка, то учитываем пересечение
                 count += 1
-            else:
-                j = 0
-                k = 0
-                if rayFromPoint.isPointLie(polygon[i]):
-                    j = i - 1
-                    k = i + 1
-
-                elif rayFromPoint.isPointLie(polygon[(i + 1) % len(polygon)]):
-                    j = i
-                    k = i + 2
-
-                while rayFromPoint.isPointLie(polygon[j]):
-                    # Ищем ближайшую из предыдущих вершин, которая не лежит на отрезке
-                    j -= 1
-                    if j < 0:
-                        j += len(polygon)
-                while rayFromPoint.isPointLie(polygon[k]):
-                    # Ищем ближайшую из следующих вершин, которая не лежит на отрезке
-                    k += 1
-                    if k >= len(polygon):
-                        k -= len(polygon)
-                pointK = polygon[k]
-                pointJ = polygon[j]
-                pointKPosition = rayFromPoint.determinePosition(pointK)
-                pointJPosition = rayFromPoint.determinePosition(pointJ)
-                if (pointKPosition * pointJPosition <= 0):
-                    # Если две точки лежат по разные стороны от отрезка, то учитываем пересечение
-                    count += 1
-                i = k
-
+            i = k
     return count % 2 == 1
 
 
