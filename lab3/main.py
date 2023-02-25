@@ -1,5 +1,5 @@
 import math
-from shared.vector import Vector
+import time
 from shared.point import Point
 from shared.segment import Segment
 from shared.polygon import Polygon
@@ -9,7 +9,9 @@ from shared.colors import COLORS
 import pygame
 from shared.drawers import drawPoint, drawPolygon
 
+
 if __name__ == "__main__":
+    clock = pygame.time.Clock()
     pygame.init()
     screen = pygame.display.set_mode((800, 800))
     pygame.display.set_caption("Lab 3")
@@ -27,13 +29,13 @@ if __name__ == "__main__":
     convexPolygon = ConvexPolygon(convexPolygonPoints)
 
     simplePolygonPoints = [
-        Point(469, 359, "p1"),
-        Point(381, 300, "p2"),
-        Point(300, 293, "p3"),
-        Point(217, 280, "p4"),
-        Point(214, 215, "p5"),
-        Point(288, 240, "p6"),
-        Point(445, 207, "p7"),
+        Point(469, 359),
+        Point(381, 300),
+        Point(300, 293),
+        Point(217, 280),
+        Point(214, 215),
+        Point(288, 240),
+        Point(445, 207),
     ]
 
     simplePolygon = Polygon(simplePolygonPoints)
@@ -43,6 +45,7 @@ if __name__ == "__main__":
 
     CORRECT_POINTS = [point for point in points if convexPolygon.contains(
         point) and not simplePolygon.contains(point)]
+    print("Points in area: ", len(CORRECT_POINTS))
     velocities = [rand_utils.generateRandomVelocity() for _ in CORRECT_POINTS]
 
     while True:
@@ -53,11 +56,20 @@ if __name__ == "__main__":
         screen.fill(COLORS["WHITE"])
 
         for point in CORRECT_POINTS:
-            drawPoint(screen, point, (0, 255, 0))
-
-        drawPolygon(screen, convexPolygonPoints, COLORS["BLUE"])
-        drawPolygon(screen, simplePolygonPoints, COLORS["RED"])
+            pygame.draw.circle(screen, COLORS["GREEN"], point.toList(), 4)
         n = len(convexPolygonPoints)
+
+        for i, point in enumerate(convexPolygonPoints):
+            pygame.draw.line(
+                screen, COLORS["BLUE"], point.toList(), convexPolygonPoints[(i + 1) % n].toList())
+            pygame.draw.circle(screen, COLORS["BLUE"], point.toList(), 4)
+
+        for i, point in enumerate(simplePolygonPoints):
+            pygame.draw.line(
+                screen, COLORS["RED"], point.toList(), simplePolygonPoints[(i + 1) % len(simplePolygonPoints)].toList())
+            pygame.draw.circle(screen, COLORS["RED"], point.toList(), 4)
+
+        pygame.display.update()
 
         for point, velocity in zip(CORRECT_POINTS, velocities):
             if (velocity.x == 0 and velocity.y == 0):
@@ -79,5 +91,3 @@ if __name__ == "__main__":
                         break
 
             point.add(velocity)
-
-        pygame.display.update()

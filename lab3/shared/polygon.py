@@ -49,4 +49,3 @@ class Polygon:
             return True
         elif abs(octanSum) == 0:
             return False
-        raise Exception("Ошибка!")
