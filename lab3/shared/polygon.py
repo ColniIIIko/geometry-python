@@ -13,6 +13,13 @@ class Polygon:
         return f"Polygon({self.points})"
 
     def contains(self, point: Point):
+        """
+        Угловой тест на основе октанов для определения положения точки относительно простого многоугольника
+
+        Алгоритмы:
+        - Габаритный тест
+        - Лучевой тест (октаны)
+        """
         if not dimensionalTest(point, self.points):
             return False
         polygon = self.points

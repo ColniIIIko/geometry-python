@@ -7,45 +7,7 @@ from shared.convex_polygon import ConvexPolygon
 import shared.random as rand_utils
 from shared.colors import COLORS
 import pygame
-from shared.drawers import drawPoint, drawPolygon, drawLine
-
-
-def isPointInsidePolygonOctan(point: Point, polygon: list[Point]):
-    octanSum = 0
-    for i in range(len(polygon)):
-        deltaI = (polygon[i] - point).toOctan()
-        deltaIPlus = (polygon[(i+1) % len(polygon)] - point).toOctan()
-        delta = deltaIPlus - deltaI
-        if delta > 4:
-            delta = delta - 8
-        elif delta < -4:
-            delta = delta + 8
-        elif abs(delta) == 4:
-            det = -1 * Segment(point, polygon[i]).determinePosition(
-                polygon[(i+1) % len(polygon)])
-            if det > 0:
-                delta = 4
-            elif det < 0:
-                delta = -4
-            else:
-                # На стороне?
-                return True
-
-        octanSum += delta
-
-    if abs(octanSum) == 8:
-        return True
-    elif abs(octanSum) == 0:
-        return False
-    raise Exception("Ошибка!")
-
-
-def angle(p0: Point, pI: Point, pIPlus: Point):
-    pureAngle = Vector.computeAngle(pI - p0, pIPlus - p0)
-    if -1 * Segment(p0, pI).determinePosition(pIPlus) < 0:
-        return -pureAngle
-    return pureAngle
-
+from shared.drawers import drawPoint, drawPolygon
 
 if __name__ == "__main__":
     pygame.init()
@@ -53,13 +15,13 @@ if __name__ == "__main__":
     pygame.display.set_caption("Lab 3")
 
     convexPolygonPoints = [
-        Point(600, 453, "p0"),
-        Point(414, 497, "p1"),
-        Point(196, 446, "p2"),
-        Point(62, 285, "p3"),
-        Point(180, 84, "p4"),
-        Point(600, 48, "p5"),
-        Point(620, 360, "p6"),
+        Point(600, 453, "q0"),
+        Point(414, 497, "q1"),
+        Point(196, 446, "q2"),
+        Point(62, 285, "q3"),
+        Point(180, 84, "q4"),
+        Point(600, 48, "q5"),
+        Point(620, 360, "q6"),
     ]
 
     convexPolygon = ConvexPolygon(convexPolygonPoints)

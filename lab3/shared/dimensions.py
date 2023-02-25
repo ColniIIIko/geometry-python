@@ -4,7 +4,7 @@ import numpy as np
 
 def getDimensions(polygon: list[Point]) -> tuple[float, float, float, float]:
     """
-    Возвращает координаты в формате xMin, xMax, yMin, yMax прямоугольника, содержащего все точки
+    Возвращает координаты в формате `xMin`, `xMax`, `yMin`, `yMax` прямоугольника, содержащего все точки
     """
     xList = [point.x for point in polygon]
     xMax = np.max(xList)
@@ -19,7 +19,7 @@ def getDimensions(polygon: list[Point]) -> tuple[float, float, float, float]:
 
 def isLieInRectangle(point: Point, xMin: float, xMax: float, yMin: float, yMax: float) -> bool:
     """
-    Проверят, лежит ли точка в прямоугольнике заданных характеристик
+    Проверяет, лежит ли точка в прямоугольнике заданных характеристик
     """
     if point.x < xMin or point.x > xMax or point.y < yMin or point.y > yMax:
         return False
