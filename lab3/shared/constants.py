@@ -1,1 +1,1 @@
-BASE_SPEED = 1
+BASE_SPEED = 3

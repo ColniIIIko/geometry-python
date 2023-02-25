@@ -22,18 +22,20 @@ class Vector:
                                       segmentVector) / Vector.scalarProduct(segmentVector, segmentVector)
 
         x, y = kf * segmentVector.x - self.x, kf * segmentVector.y - self.y
-
         self.x = x
         self.y = y
 
-    def __add__(self, other):
+    def __add__(self, other) -> Vector:
         return Vector(self.x + other.x, self.y + other.y)
 
-    def __sub__(self, other):
+    def __sub__(self, other) -> Vector:
         return Vector(self.x - other.x, self.y - other.y)
 
-    def __truediv__(self, number: int) -> Vector:
+    def __truediv__(self, number: float) -> Vector:
         return Vector(self.x / number, self.y / number)
+
+    def __mul__(self, number: float):
+        return Vector(self.x * number, self.y * number)
 
     def __str__(self):
         return f"({self.x}, {self.y})"

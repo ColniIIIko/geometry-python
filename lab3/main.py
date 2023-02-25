@@ -2,7 +2,6 @@ import math
 from shared.vector import Vector
 from shared.point import Point
 from shared.segment import Segment
-from shared.dimensions import dimensionalTest
 from shared.polygon import Polygon
 from shared.convex_polygon import ConvexPolygon
 import shared.random as rand_utils
@@ -99,8 +98,11 @@ if __name__ == "__main__":
         n = len(convexPolygonPoints)
 
         for point, velocity in zip(CORRECT_POINTS, velocities):
+            if (velocity.x == 0 and velocity.y == 0):
+                continue
             if simplePolygon.contains(point):
                 velocity.clear()
+                continue
             # TODO: Bug - some points can get out from Polygon
 
             predictedPoint = point + velocity
@@ -110,8 +112,9 @@ if __name__ == "__main__":
                     segment = Segment(
                         convexPolygonPoints[i], convexPolygonPoints[(i + 1) % n])
 
-                    if segment.determinePosition(point) <= 0:
+                    if segment.determinePosition(predictedPoint) > 0:
                         velocity.reflect(segment)
+                        break
 
             point.add(velocity)
 

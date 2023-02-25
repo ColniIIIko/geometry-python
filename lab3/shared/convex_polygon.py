@@ -12,24 +12,18 @@ def angle(p0: Point, pI: Point, pIPlus: Point):
 
 
 class ConvexPolygon(Polygon):
-    # TODO: Must be implemented
-    # def contains(self, point: Point):
-    #     polygon = self.points
-    #     n = len(polygon)
-    #     pointZ = (polygon[n // 2] + polygon[0]) / 2
+    def contains(self, point: Point):
+        n = len(self.points)
+        if -1 * Segment(self.points[0], self.points[1]).determinePosition(point) < 0 or -1 * Segment(self.points[0], self.points[n-1]).determinePosition(point) > 0:
+            return False
 
-    #     polygonWithAppendedPoint = [p for p in polygon]
-    #     polygonWithAppendedPoint.append(polygonWithAppendedPoint[0])
-    #     point1 = polygon[0]
-    #     start = 0
-    #     end = n
-    #     while (end - start > 1):
-    #         center = int((start + end) / 2)
-    #         if angle(point1, pointZ, point) < angle(point1, pointZ, polygonWithAppendedPoint[center]):
-    #             end = center
-    #         else:
-    #             start = center
-    #     print(start, end)
-    #     return angle(polygonWithAppendedPoint[start], polygonWithAppendedPoint[end], point) < 0
+        start, end = 1, n - 1
+        while end - start > 1:
+            center = (start + end) // 2
+            if -1 * Segment(self.points[0], self.points[center]).determinePosition(point) < 0:
+                end = center
+            else:
+                start = center
 
+        return not Segment.isIntersects(Segment(self.points[start], self.points[end]), Segment(self.points[0], point))
     pass
