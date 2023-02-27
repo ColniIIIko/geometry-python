@@ -1,5 +1,3 @@
-import math
-import time
 from shared.point import Point
 from shared.segment import Segment
 from shared.polygon import Polygon
@@ -7,7 +5,6 @@ from shared.convex_polygon import ConvexPolygon
 import shared.random as rand_utils
 from shared.colors import COLORS
 import pygame
-from shared.drawers import drawPoint, drawPolygon
 
 
 if __name__ == "__main__":
@@ -22,8 +19,8 @@ if __name__ == "__main__":
         Point(196, 446, "q2"),
         Point(62, 285, "q3"),
         Point(180, 84, "q4"),
-        Point(600, 48, "q5"),
-        Point(620, 360, "q6"),
+        Point(600, 100, "q5"),
+        Point(650, 360, "q6"),
     ]
 
     convexPolygon = ConvexPolygon(convexPolygonPoints)
@@ -45,14 +42,17 @@ if __name__ == "__main__":
 
     CORRECT_POINTS = [point for point in points if convexPolygon.contains(
         point) and not simplePolygon.contains(point)]
-    print("Points in area: ", len(CORRECT_POINTS))
     velocities = [rand_utils.generateRandomVelocity() for _ in CORRECT_POINTS]
-
+    isFinished = False
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
+
+        if isFinished:
+            continue
+
         screen.fill(COLORS["WHITE"])
 
         for point in CORRECT_POINTS:
@@ -71,13 +71,14 @@ if __name__ == "__main__":
 
         pygame.display.update()
 
+        STOPPED_COUNT = 0
         for point, velocity in zip(CORRECT_POINTS, velocities):
             if (velocity.x == 0 and velocity.y == 0):
+                STOPPED_COUNT += 1
                 continue
             if simplePolygon.contains(point):
                 velocity.clear()
                 continue
-            # TODO: Bug - some points can get out from Polygon
 
             predictedPoint = point + velocity
 
@@ -91,3 +92,9 @@ if __name__ == "__main__":
                         break
 
             point.add(velocity)
+
+        clock.tick(24)
+
+        if STOPPED_COUNT == len(CORRECT_POINTS):
+            isFinished = True
+            print("Animation is finished now")
