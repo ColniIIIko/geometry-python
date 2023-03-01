@@ -1,15 +1,10 @@
-import math
-import time
 from shared.vector import Vector
 from shared.point import Point
 from shared.segment import Segment
-from shared.polygon import Polygon
-from shared.convex_polygon import ConvexPolygon
 import shared.random as rand_utils
 from shared.colors import COLORS
 import pygame
-from shared.drawers import drawPoint, drawPolygon, drawLine
-from shared.stack import PointStack
+from shared.drawers import drawPoint, drawLine
 
 
 def findMinimalYPoint(points: list[Point]) -> Point:
@@ -25,15 +20,15 @@ def findMinimalYPoint(points: list[Point]) -> Point:
 def determineCos(startPoint: Point, endPoint: Point) -> float:
     line = endPoint - startPoint
     xAxis = Vector(1, 0)
-    cos = - Vector.scalarProduct(line, xAxis) / line.length()
+    cos = -Vector.scalarProduct(line, xAxis) / line.length()
     return cos
 
 
 def sortByAngle(points: list[Point], startPoint: Point):
-    angleList = [determineCos(startPoint, point) for point in points]
     pointsCopy = [point for point in points if point != startPoint]
     pointsCopy.sort(key=lambda point: determineCos(
         startPoint, point), reverse=True)
+    pointsCopy.append(startPoint)
     return pointsCopy
 
 
@@ -42,9 +37,11 @@ if __name__ == "__main__":
     clock = pygame.time.Clock()
     screen = pygame.display.set_mode((800, 800))
     pygame.display.set_caption("Lab 4")
+    screen.fill(COLORS["WHITE"])
 
-    POINT_COUNT = 32
+    POINT_COUNT = 16
     PADDING = 50
+    FPS = 2
 
     points = rand_utils.generateRandomPoints(
         POINT_COUNT, PADDING, 800 - PADDING, PADDING, 800 - PADDING)
@@ -52,11 +49,17 @@ if __name__ == "__main__":
     def drawPoints():
         for point in points:
             drawPoint(screen, point, COLORS["BLACK"])
+
+    def drawLines(points: list[Point]):
+        for i in range(len(points) - 1):
+            drawLine(screen, points[i], points[i+1], COLORS["BLACK"])
+
     startPoint = findMinimalYPoint(points)
     SORTED_POINTS = sortByAngle(points, startPoint)
-    ch = PointStack()
-    ch.put(startPoint)
-    ch.put(SORTED_POINTS[0])
+    convexHull = [startPoint, SORTED_POINTS[0]]
+
+    drawPoints()
+    drawLines(convexHull)
     isCompleted = False
     while True:
         for event in pygame.event.get():
@@ -65,33 +68,31 @@ if __name__ == "__main__":
                 quit()
         if isCompleted:
             continue
-        screen.fill(COLORS["WHITE"])
-        drawPoints()
-        n = len(SORTED_POINTS)
-        for i in range(1, len(SORTED_POINTS)):
-            for j in range(0, len(ch.items) - 1):
-                drawLine(screen, ch.items[j], ch.items[j+1], COLORS["BLACK"])
-
-            pygame.display.update()
-            clock.tick(2)
-            while Segment(ch.items[-2], ch.items[-1]).determinePosition(SORTED_POINTS[i]) < 0:
-                extracted = ch.get()
+        i, j = 1, 1
+        while i < len(SORTED_POINTS):
+            candidate = SORTED_POINTS[i]
+            if Segment(convexHull[j - 1], convexHull[j]).determinePosition(candidate) > 0:
+                convexHull.append(candidate)
+                drawLine(screen, convexHull[j],
+                         candidate, COLORS["BLACK"])
+                clock.tick(FPS)
+                pygame.display.update()
+                j += 1
+            else:
+                i -= 1
+                j -= 1
+                convexHull.pop()
                 screen.fill(COLORS["WHITE"])
                 drawPoints()
-                for j in range(0, len(ch.items) - 1):
-                    drawLine(screen, ch.items[j],
-                             ch.items[j+1], COLORS["BLACK"])
-                    pygame.display.update()
+                drawLines(convexHull)
+                clock.tick(FPS)
+                pygame.display.update()
+            i += 1
 
-                clock.tick(2)
-
-            ch.put(SORTED_POINTS[i])
-            clock.tick(2)
-
-        screen.fill(COLORS["WHITE"])
-        isCompleted = True
-        drawPoints()
-        for i in range(len(ch.items)):
-            drawLine(screen, ch.items[i], ch.items[(i + 1) %
-                     len(ch.items)], COLORS["BLACK"])
         pygame.display.update()
+        print("Convex hull: ")
+        for point in convexHull:
+            print(point, end=" ")
+
+        print()
+        isCompleted = True

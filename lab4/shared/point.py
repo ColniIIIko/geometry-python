@@ -7,7 +7,7 @@ class Point(Vector):
         self.caption = caption
 
     def __str__(self):
-        return f"({self.x}, {self.y})"
+        return f"Point({self.x}, {self.y}, {self.caption})"
 
     def __repr__(self):
         return f"Point({self.x}, {self.y}, {self.caption})"
