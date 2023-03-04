@@ -33,9 +33,11 @@ def sortByAngle(points: list[Point], startPoint: Point):
 
 
 if __name__ == "__main__":
+    WINDOWS_WIDTH = 800
+    WINDOWS_HEIGHT = 800
     pygame.init()
     clock = pygame.time.Clock()
-    screen = pygame.display.set_mode((800, 800))
+    screen = pygame.display.set_mode((WINDOWS_WIDTH, WINDOWS_HEIGHT))
     pygame.display.set_caption("Lab 4")
     screen.fill(COLORS["WHITE"])
 
@@ -44,7 +46,7 @@ if __name__ == "__main__":
     FPS = 2
 
     points = rand_utils.generateRandomPoints(
-        POINT_COUNT, PADDING, 800 - PADDING, PADDING, 800 - PADDING)
+        POINT_COUNT, PADDING, WINDOWS_WIDTH - PADDING, PADDING, WINDOWS_HEIGHT - PADDING)
 
     def drawPoints():
         for point in points:
@@ -70,14 +72,19 @@ if __name__ == "__main__":
             continue
         i, j = 1, 1
         while i < len(SORTED_POINTS):
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    quit()
+
             candidate = SORTED_POINTS[i]
             if Segment(convexHull[j - 1], convexHull[j]).determinePosition(candidate) > 0:
                 convexHull.append(candidate)
                 drawLine(screen, convexHull[j],
                          candidate, COLORS["BLACK"])
                 clock.tick(FPS)
-                pygame.display.update()
                 j += 1
+                pygame.display.update()
             else:
                 i -= 1
                 j -= 1
@@ -90,9 +97,6 @@ if __name__ == "__main__":
             i += 1
 
         pygame.display.update()
-        print("Convex hull: ")
-        for point in convexHull:
-            print(point, end=" ")
-
-        print()
+        print("Convex hull (point names only): ")
+        print(", ".join([point.caption for point in convexHull]))
         isCompleted = True
