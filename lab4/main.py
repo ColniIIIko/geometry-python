@@ -48,13 +48,13 @@ if __name__ == "__main__":
     points = rand_utils.generateRandomPoints(
         POINT_COUNT, PADDING, WINDOWS_WIDTH - PADDING, PADDING, WINDOWS_HEIGHT - PADDING)
 
-    def drawPoints():
+    def drawPoints(color=COLORS["BLACK"]):
         for point in points:
-            drawPoint(screen, point, COLORS["BLACK"])
+            drawPoint(screen, point, color)
 
-    def drawLines(points: list[Point]):
+    def drawLines(points: list[Point], color=COLORS["BLACK"]):
         for i in range(len(points) - 1):
-            drawLine(screen, points[i], points[i+1], COLORS["BLACK"])
+            drawLine(screen, points[i], points[i+1], color)
 
     startPoint = findMinimalYPoint(points)
     SORTED_POINTS = sortByAngle(points, startPoint)
@@ -99,4 +99,7 @@ if __name__ == "__main__":
         pygame.display.update()
         print("Convex hull (point names only): ")
         print(", ".join([point.caption for point in convexHull]))
+        drawLines(convexHull, COLORS["RED"])
+        pygame.display.update()
+
         isCompleted = True
