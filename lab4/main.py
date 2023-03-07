@@ -25,9 +25,19 @@ def determineCos(startPoint: Point, endPoint: Point) -> float:
 
 
 def sortByAngle(points: list[Point], startPoint: Point):
+    # TODO: Improvements of Algorithm - may not sort
     pointsCopy = [point for point in points if point != startPoint]
+    pointsCopy.sort(key=lambda point: (
+        point - startPoint).length(), reverse=True)
     pointsCopy.sort(key=lambda point: determineCos(
         startPoint, point), reverse=True)
+    for point in pointsCopy:
+        for lPoint in [aPoint for aPoint in pointsCopy if determineCos(
+                startPoint, point) == determineCos(
+                startPoint, aPoint)]:
+            if (lPoint != point):
+                pointsCopy.remove(lPoint)
+
     pointsCopy.append(startPoint)
     return pointsCopy
 
@@ -43,7 +53,7 @@ if __name__ == "__main__":
 
     POINT_COUNT = 16
     PADDING = 50
-    FPS = 2
+    FPS = 3
 
     points = rand_utils.generateRandomPoints(
         POINT_COUNT, PADDING, WINDOWS_WIDTH - PADDING, PADDING, WINDOWS_HEIGHT - PADDING)
@@ -99,7 +109,8 @@ if __name__ == "__main__":
         pygame.display.update()
         print("Convex hull (point names only): ")
         print(", ".join([point.caption for point in convexHull]))
-        drawLines(convexHull, COLORS["RED"])
+        for point in convexHull:
+            drawPoint(screen, point, COLORS["RED"])
         pygame.display.update()
 
         isCompleted = True
