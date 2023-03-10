@@ -1,3 +1,4 @@
+import math
 from shared.point import Point
 from shared.vector import Vector
 from shared.segment import Segment
@@ -59,6 +60,7 @@ def determineCos(startPoint: Point, endPoint: Point, direction=1) -> float:
 def getTriangleSquare(point1: Point, point2: Point, point3: Point) -> float:
     vector1 = point1 - point3
     vector2 = point2 - point3
+    return abs(vector1.x * vector2.y - vector1.y * vector2.x) / 2
     return np.abs(np.linalg.det([vector1.toList(), vector2.toList()])) / 2
 
 
@@ -79,21 +81,32 @@ def findMinHigherAngleToPoint(startPoint: Point, points: list[Point], direction=
     return minAnglePoint
 
 
+def createConvexHull(points: list[Point], pLeft: Point, pRight: Point) -> list[Point]:
+    if len(points) == 0:
+        return [pLeft, pRight]
+    maxAreaPoint = max(
+        points, key=lambda point: getTriangleSquare(pLeft, pRight, point))
+
+    segment1 = Segment(pLeft, maxAreaPoint)
+    segment2 = Segment(maxAreaPoint, pRight)
+
+    s1 = [point for point in points if segment1.determinePosition(point) > 0]
+    s2 = [point for point in points if segment2.determinePosition(point) > 0]
+
+    return createConvexHull(s1, pLeft, maxAreaPoint) + [maxAreaPoint] + createConvexHull(s2, maxAreaPoint, pRight)
+
+
 def findConvexHull(points: list[Point]):
-    startPoint = findMinimalYPoint(points)
-    convexHull = [startPoint]
-    activePoint = findMinHigherAngleToPoint(startPoint, points)
-    convexHull.append(activePoint)
+    pLeft = min(points, key=lambda point: point.x)
+    pRight = max(points, key=lambda point: point.x)
+    print("Left: ", pLeft, ", right: ", pRight)
+    pLRSegment = Segment(pLeft, pRight)
+    pointsOnLeftSide = [
+        point for point in points if pLRSegment.determinePosition(point) > 0]
+    pointsOnRightSide = [
+        point for point in points if pLRSegment.determinePosition(point) < 0]
 
-    direction = 1
-    maxYPont = findMaximumYPoint(points)
-    while activePoint != startPoint:
-        if direction != -1 and activePoint == maxYPont:
-            direction = -1
-        activePoint = findMinHigherAngleToPoint(activePoint, points, direction)
-        convexHull.append(activePoint)
-
-    return convexHull
+    return createConvexHull(pointsOnLeftSide, pLeft, pRight) + createConvexHull(pointsOnRightSide, pRight, pLeft)
 
 
 def getPointListDiameter(points: list[Point]):
@@ -134,15 +147,15 @@ if __name__ == "__main__":
     pygame.display.set_caption("Lab 4")
     screen.fill(COLORS["WHITE"])
 
-    POINT_COUNT = 8
-    FPS = 60
-    DIAMETER = 600
+    POINT_COUNT = 6
+    FPS = 24
+    DIAMETER = 400
 
     points = rand_utils.generateRandomPoints(
         POINT_COUNT, 400 - DIAMETER // 3, 400 + DIAMETER // 3, 400 - DIAMETER // 3, 400 + DIAMETER // 3)
     velocities = [rand_utils.generateRandomVelocity() for _ in points]
     isFinished = False
-
+    # print(convexHull)
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -154,19 +167,15 @@ if __name__ == "__main__":
 
         for point in points:
             drawPoint(screen, point, COLORS["BLACK"])
+        convexHull = findConvexHull(points)
+        drawLines(convexHull)
 
         pygame.display.update()
 
         screen.fill(COLORS["WHITE"])
 
-        convexHull = findConvexHull(points)
-        # print(convexHull)
-        drawLines(convexHull)
-
         point1, point2 = getPointListDiameter(points)
         diameter = Vector(point2.x - point1.x, point2.y - point1.y).length()
-        # print(point1.caption, point2.caption)
-        print(diameter)
         drawLine(screen, point1, point2, COLORS["RED"])
         for point, velocity in zip(points, velocities):
             if diameter > DIAMETER:
