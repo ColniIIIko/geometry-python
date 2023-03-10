@@ -114,8 +114,9 @@ if __name__ == "__main__":
         screen.fill(COLORS["WHITE"])
 
         perimeter = computePerimeter(convexHull)
+        print("Perimeter: ", perimeter)
         for point, velocity in zip(points, velocities):
-            if perimeter > MAXIMAL_PERIMETER:
+            if perimeter > MAXIMAL_PERIMETER and point in convexHull:
                 velocity.inverse()
 
             point.add(velocity)
