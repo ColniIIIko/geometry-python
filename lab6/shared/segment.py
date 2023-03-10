@@ -55,6 +55,7 @@ class Segment:
         """
         ABVector = self.end - self.start
         A0Vector = point - self.start
+        return A0Vector.x * ABVector.y - A0Vector.y * ABVector.x
         det = np.linalg.det([A0Vector.toList(), ABVector.toList()])
         return det
 
