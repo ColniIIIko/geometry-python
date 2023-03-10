@@ -60,7 +60,6 @@ def determineCos(startPoint: Point, endPoint: Point, direction=1) -> float:
 def getTriangleSquare(point1: Point, point2: Point, point3: Point) -> float:
     vector1 = point1 - point3
     vector2 = point2 - point3
-    return abs(vector1.x * vector2.y - vector1.y * vector2.x) / 2
     return np.abs(np.linalg.det([vector1.toList(), vector2.toList()])) / 2
 
 
@@ -99,7 +98,6 @@ def createConvexHull(points: list[Point], pLeft: Point, pRight: Point) -> list[P
 def findConvexHull(points: list[Point]):
     pLeft = min(points, key=lambda point: point.x)
     pRight = max(points, key=lambda point: point.x)
-    print("Left: ", pLeft, ", right: ", pRight)
     pLRSegment = Segment(pLeft, pRight)
     pointsOnLeftSide = [
         point for point in points if pLRSegment.determinePosition(point) > 0]
@@ -141,15 +139,17 @@ def drawLines(points: list[Point]):
 
 
 if __name__ == "__main__":
+    print("Square is: ", getTriangleSquare(
+        Point(0, 0), Point(0, 3), Point(4, 0)))
     pygame.init()
     clock = pygame.time.Clock()
     screen = pygame.display.set_mode((800, 800))
     pygame.display.set_caption("Lab 4")
     screen.fill(COLORS["WHITE"])
 
-    POINT_COUNT = 6
+    POINT_COUNT = 3
     FPS = 24
-    DIAMETER = 400
+    DIAMETER = 200
 
     points = rand_utils.generateRandomPoints(
         POINT_COUNT, 400 - DIAMETER // 3, 400 + DIAMETER // 3, 400 - DIAMETER // 3, 400 + DIAMETER // 3)
