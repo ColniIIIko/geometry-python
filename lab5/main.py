@@ -57,29 +57,42 @@ def determineCos(startPoint: Point, endPoint: Point, direction=1) -> float:
 
 
 def getTriangleSquare(point1: Point, point2: Point, point3: Point) -> float:
+    """
+    Вычисляет площадь треугольника, заданного тремя точками
+    """
     vector1 = point1 - point3
     vector2 = point2 - point3
     return np.abs(np.linalg.det([vector1.toList(), vector2.toList()])) / 2
 
 
 def findMinHigherAngleToPoint(startPoint: Point, points: list[Point], direction=1):
+    """
+    Нахождение точки с минимальным углом относительно полярной оси через точку
+    """
     pointsCopy: list[Point] = [
         point for point in points if point != startPoint]
 
+    # Точки находящиеся выше (ниже) полярной оси
+    pointsUpperOrLower = [
+        point for point in pointsCopy if direction * point.y >= direction * startPoint.y]
+
     minAnglePoint = startPoint
     i = 0
-    while minAnglePoint.y * direction <= startPoint.y * direction and i < len(pointsCopy):
-        minAnglePoint = pointsCopy[i]
+    while minAnglePoint.y * direction <= startPoint.y * direction and i < len(pointsUpperOrLower):
+        minAnglePoint = pointsUpperOrLower[i]
         i += 1
 
-    for point in pointsCopy:
-        if determineCos(startPoint, point, direction * -1) > determineCos(startPoint, minAnglePoint, direction * -1) and direction * point.y >= direction * startPoint.y:
+    for point in pointsUpperOrLower:
+        if determineCos(startPoint, point, direction * -1) > determineCos(startPoint, minAnglePoint, direction * -1):
             minAnglePoint = point
 
     return minAnglePoint
 
 
 def findConvexHull(points: list[Point]):
+    """
+    Алгоритм Джарвиса нахождения выпуклой оболочки
+    """
     startPoint = findMinimalYPoint(points)
     convexHull = [startPoint]
     activePoint = findMinHigherAngleToPoint(startPoint, points)
@@ -98,7 +111,7 @@ def findConvexHull(points: list[Point]):
 
 def getPointListDiameter(points: list[Point]):
     convexHull = findConvexHull(points)
-    points
+    diameterPoints: tuple[Point, Point]
     diameter = 0
     i = 1
     while (getTriangleSquare(convexHull[-1], convexHull[0], convexHull[i]) < getTriangleSquare(convexHull[-1], convexHull[0], convexHull[i+1])):
@@ -115,11 +128,12 @@ def getPointListDiameter(points: list[Point]):
                 convexHull[j % len(convexHull)] - convexHull[k]).length()
             if diameter < currentDiameter:
                 diameter = currentDiameter
-                points = (convexHull[j % len(convexHull)], convexHull[k])
+                diameterPoints = (
+                    convexHull[j % len(convexHull)], convexHull[k])
         start = end
         j += 1
 
-    return points
+    return diameterPoints
 
 
 def drawLines(points: list[Point]):
@@ -134,23 +148,19 @@ if __name__ == "__main__":
     pygame.display.set_caption("Lab 4")
     screen.fill(COLORS["WHITE"])
 
-    POINT_COUNT = 8
+    POINT_COUNT = 12
     FPS = 60
-    DIAMETER = 600
+    DIAMETER = 400
 
     points = rand_utils.generateRandomPoints(
         POINT_COUNT, 400 - DIAMETER // 3, 400 + DIAMETER // 3, 400 - DIAMETER // 3, 400 + DIAMETER // 3)
     velocities = [rand_utils.generateRandomVelocity() for _ in points]
-    isFinished = False
 
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
-
-        if isFinished:
-            continue
 
         for point in points:
             drawPoint(screen, point, COLORS["BLACK"])
@@ -160,13 +170,10 @@ if __name__ == "__main__":
         screen.fill(COLORS["WHITE"])
 
         convexHull = findConvexHull(points)
-        # print(convexHull)
         drawLines(convexHull)
 
         point1, point2 = getPointListDiameter(points)
-        diameter = Vector(point2.x - point1.x, point2.y - point1.y).length()
-        # print(point1.caption, point2.caption)
-        print(diameter)
+        diameter = (point2 - point1).length()
         drawLine(screen, point1, point2, COLORS["RED"])
         for point, velocity in zip(points, velocities):
             if diameter > DIAMETER:
