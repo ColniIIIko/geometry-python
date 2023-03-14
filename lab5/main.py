@@ -76,11 +76,7 @@ def findMinHigherAngleToPoint(startPoint: Point, points: list[Point], direction=
     pointsUpperOrLower = [
         point for point in pointsCopy if direction * point.y >= direction * startPoint.y]
 
-    minAnglePoint = startPoint
-    i = 0
-    while minAnglePoint.y * direction <= startPoint.y * direction and i < len(pointsUpperOrLower):
-        minAnglePoint = pointsUpperOrLower[i]
-        i += 1
+    minAnglePoint = pointsUpperOrLower[0]
 
     for point in pointsUpperOrLower:
         if determineCos(startPoint, point, direction * -1) > determineCos(startPoint, minAnglePoint, direction * -1):
@@ -117,7 +113,6 @@ def getPointListDiameter(points: list[Point]):
     while (getTriangleSquare(convexHull[-1], convexHull[0], convexHull[i]) < getTriangleSquare(convexHull[-1], convexHull[0], convexHull[i+1])):
         i += 1
     start = i
-    isLapped = False
     j = 0
     while j <= len(convexHull):
         while (getTriangleSquare(convexHull[j % len(convexHull)], convexHull[(j+1) % len(convexHull)], convexHull[i]) < getTriangleSquare(convexHull[j % len(convexHull)], convexHull[(j+1) % len(convexHull)], convexHull[(i+1) % len(convexHull)])):

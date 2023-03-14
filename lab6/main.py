@@ -49,7 +49,7 @@ def findMinHigherAngleToPoint(startPoint: Point, points: list[Point], direction=
 
 def createConvexHull(points: list[Point], pLeft: Point, pRight: Point) -> list[Point]:
     if len(points) == 0:
-        return [pLeft, pRight]
+        return [pRight]
     maxAreaPoint = max(
         points, key=lambda point: getTriangleArea(pLeft, pRight, point))
 
@@ -59,7 +59,7 @@ def createConvexHull(points: list[Point], pLeft: Point, pRight: Point) -> list[P
     s1 = [point for point in points if segment1.determinePosition(point) > 0]
     s2 = [point for point in points if segment2.determinePosition(point) > 0]
 
-    return createConvexHull(s1, pLeft, maxAreaPoint) + [maxAreaPoint] + createConvexHull(s2, maxAreaPoint, pRight)
+    return createConvexHull(s1, pLeft, maxAreaPoint) + createConvexHull(s2, maxAreaPoint, pRight)
 
 
 def findConvexHull(points: list[Point]):
@@ -71,7 +71,7 @@ def findConvexHull(points: list[Point]):
     pointsOnRightSide = [
         point for point in points if pLRSegment.determinePosition(point) < 0]
 
-    return createConvexHull(pointsOnLeftSide, pLeft, pRight) + createConvexHull(pointsOnRightSide, pRight, pLeft)
+    return [pLeft] + createConvexHull(pointsOnLeftSide, pLeft, pRight) + createConvexHull(pointsOnRightSide, pRight, pLeft)
 
 
 def drawLines(points: list[Point]):
