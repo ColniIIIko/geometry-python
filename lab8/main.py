@@ -15,17 +15,26 @@ def clipSegment(segment: Segment, polygon: ConvexPolygon):
     n = len(points)
     minimalParameter = 0
     maximumParameter = 1
+    isIntersect = False
     for i in range(n):
         polygonEdge = Segment(points[i], points[(i + 1) % n])
         parameter = getSegmentIntersectionParameter(polygonEdge, segment)
         if parameter is None:
             continue
+        isIntersect = True
         if getPointClassification(segment, polygonEdge) == 'ПВ':
             minimalParameter = max(minimalParameter, parameter)
             pass
         else:
             maximumParameter = min(maximumParameter, parameter)
             pass
+
+    if minimalParameter > maximumParameter:
+        return None
+
+    if not isIntersect and not polygon.contains(segment.start) and not polygon.contains(segment.end):
+        return None
+
     newStart = segment.start * (1 - minimalParameter) + \
         segment.end * minimalParameter
     newEnd = segment.start * (1 - maximumParameter) + \
@@ -46,7 +55,7 @@ def getSegmentIntersectionParameter(AB: Segment, CD: Segment) -> float | None:
     p3 = CD.start
     p4 = CD.end
     normalVector = AB.toVector().getLeftHandNormal()
-    return - Vector.scalarProduct(p3 - p1, normalVector) / Vector.scalarProduct(p4 - p3, normalVector)
+    return -Vector.scalarProduct(p3 - p1, normalVector) / Vector.scalarProduct(p4 - p3, normalVector)
 
 
 def getPointClassification(AB: Segment, pIpIPlus: Segment):
@@ -79,9 +88,10 @@ if __name__ == "__main__":
     convexPolygon = ConvexPolygon(convexPolygonPoints)
     drawPolygon(screen, convexPolygonPoints, COLORS["BLACK"])
     clipper = Segment(Point(100, 200), Point(700, 600))
-    drawLine(screen, clipper.start, clipper.end, COLORS["BLACK"])
     SEGMENT = clipSegment(clipper, convexPolygon)
-    drawLine(screen, SEGMENT.start, SEGMENT.end, COLORS["RED"])
+    drawLine(screen, clipper.start, clipper.end, COLORS["BLACK"])
+    if SEGMENT is not None:
+        drawLine(screen, SEGMENT.start, SEGMENT.end, COLORS["RED"])
     pygame.display.update()
     FPS = 2
     while True:
