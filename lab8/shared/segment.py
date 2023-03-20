@@ -64,3 +64,14 @@ class Segment:
         Проверят, лежит ли точка на отрезке (включая концы)
         """
         return Vector.scalarProduct(self.start - point, self.end - point) <= 0 and self.determinePosition(point) == 0
+
+    def isAimedAt(self, segment: Segment) -> bool:
+        a = self.toVector()
+        b = segment.toVector()
+        det = b.x * a.y - b.y * a.x
+
+        isInside = segment.determinePosition(self.end) <= 0
+        if isInside:
+            return det < 0
+        else:
+            return det >= 0

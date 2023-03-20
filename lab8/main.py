@@ -36,12 +36,6 @@ def clipSegment(segment: Segment, polygon: ConvexPolygon):
     return newSegment
 
 
-def isAimedAt(a: Vector, b: Vector) -> bool:
-    """
-    Определяет, нацелен ли вектор a на b
-    """
-
-
 def getSegmentIntersectionParameter(AB: Segment, CD: Segment) -> float | None:
     """
     Ищет параметр (для CD) точки пересечения отрезков AB & CD

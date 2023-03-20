@@ -50,3 +50,10 @@ class Polygon:
         elif abs(octanSum) == 0:
             return False
         raise Exception("Ошибка!")
+
+    def getEdges(self) -> list[Segment]:
+        edges: list[Segment] = []
+        n = len(self.points)
+        for i in range(n):
+            edges.append(Segment(self.points[i], self.points[(i + 1) % n]))
+        return edges
