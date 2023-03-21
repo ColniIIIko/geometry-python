@@ -45,6 +45,63 @@ def clipSegment(segment: Segment, polygon: ConvexPolygon):
     return newSegment
 
 
+def clipPolygon(polygonP: ConvexPolygon, polygonQ: ConvexPolygon):
+    points: list[Point] = []
+    edgesP = polygonP.getEdges()
+    edgesQ = polygonQ.getEdges()
+    currentIndexP: int = 0
+    currentIndexQ: int = 0
+    # for indexP, edgeP in enumerate(edgesP):
+    #     for indexQ, edgeQ in enumerate(edgesQ):
+    #         point = getSegmentIntersectionPoint(edgeP, edgeQ)
+    #         if point is not None:
+    #             currentIndexP = indexP
+    #             currentIndexQ = indexQ
+
+    isOver = False
+    while not isOver:
+        currentIndexQ = currentIndexQ % len(edgesQ)
+        currentIndexP = currentIndexP % len(edgesP)
+        currentEdgeQ = edgesQ[currentIndexQ]
+        currentEdgeP = edgesP[currentIndexP]
+        if currentEdgeP.isAimedAt(currentEdgeQ):
+            if currentEdgeQ.isAimedAt(currentEdgeP):
+                if polygonP.contains(currentEdgeQ.end) or currentEdgeQ.determinePosition(currentEdgeP.end) >= 0:
+                    currentIndexP += 1
+                else:
+                    currentIndexQ += 1
+            else:
+                if polygonQ.contains(currentEdgeP.end):  # !!!
+                    points.append(currentEdgeP.end)
+                currentIndexP += 1
+        else:
+            if currentEdgeQ.isAimedAt(currentEdgeP):
+                if polygonP.contains(currentEdgeQ.end):
+                    points.append(currentEdgeQ.end)
+                currentIndexQ += 1
+            else:
+                point = getSegmentIntersectionPoint(currentEdgeP, currentEdgeQ)
+                if point is not None:
+                    points.append(point)
+                if polygonP.contains(currentEdgeQ.end) or currentEdgeQ.determinePosition(currentEdgeP.end) >= 0:
+                    currentIndexP += 1
+                else:
+                    currentIndexQ += 1
+
+        if len(points) >= 3 and points[0] == points[-1]:
+            isOver = True
+
+    return points
+
+
+def getSegmentIntersectionPoint(AB: Segment, CD: Segment) -> Point | None:
+    parameter = getSegmentIntersectionParameter(AB, CD)
+    if parameter is None:
+        return None
+    vector = CD.start * (1 - parameter) + CD.end * parameter
+    return Point(vector.x, vector.y)
+
+
 def getSegmentIntersectionParameter(AB: Segment, CD: Segment) -> float | None:
     """
     Ищет параметр (для CD) точки пересечения отрезков AB & CD
@@ -74,7 +131,6 @@ if __name__ == "__main__":
     clock = pygame.time.Clock()
     screen = pygame.display.set_mode((800, 800))
     pygame.display.set_caption("Lab 8")
-    screen.fill(COLORS["WHITE"])
     convexPolygonPoints = [
         Point(600, 453, "q0"),
         Point(414, 497, "q1"),
@@ -85,17 +141,64 @@ if __name__ == "__main__":
         Point(650, 360, "q6"),
     ]
 
-    convexPolygon = ConvexPolygon(convexPolygonPoints)
-    drawPolygon(screen, convexPolygonPoints, COLORS["BLACK"])
-    clipper = Segment(Point(100, 200), Point(700, 600))
-    SEGMENT = clipSegment(clipper, convexPolygon)
-    drawLine(screen, clipper.start, clipper.end, COLORS["BLACK"])
-    if SEGMENT is not None:
-        drawLine(screen, SEGMENT.start, SEGMENT.end, COLORS["RED"])
-    pygame.display.update()
-    FPS = 2
+    convexPolygonPoints2 = [
+        Point(530, 550, "p0"),
+        Point(430, 380, "p1"),
+        Point(410, 290, "p2"),
+        Point(650, 253, "p3"),
+    ]
+
+    # screen.fill(COLORS["WHITE"])
+
+    # convexPolygon = ConvexPolygon(convexPolygonPoints)
+    # convexPolygon2 = ConvexPolygon(convexPolygonPoints2)
+    # clipPolygonPoints = clipPolygon(convexPolygon2, convexPolygon)
+    # drawPolygon(screen, convexPolygonPoints, COLORS["YELLOW"])
+    # drawPolygon(screen, convexPolygonPoints2, COLORS["BLUE"])
+    # if clipPolygonPoints is not None:
+    #     drawPolygon(screen, clipPolygonPoints, COLORS["GREEN"])
+    # clipper = Segment(convexPolygonPoints[1], convexPolygonPoints[3])
+    # drawLine(screen, clipper.start, clipper.end, COLORS["BLACK"], 3)
+    # SEGMENT = clipSegment(clipper, convexPolygon2)
+    # if SEGMENT is not None:
+    #     drawLine(screen, SEGMENT.start, SEGMENT.end, COLORS["RED"], 3)
+    # pygame.display.update()
+
+    velocity = Vector(1.5, 1.5)
+    velocity2 = Vector(-3, 0.5)
+    FPS = 24
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
+        screen.fill(COLORS["WHITE"])
+
+        convexPolygon = ConvexPolygon(convexPolygonPoints)
+        convexPolygon2 = ConvexPolygon(convexPolygonPoints2)
+        clipPolygonPoints = clipPolygon(convexPolygon2, convexPolygon)
+
+        drawPolygon(screen, convexPolygonPoints, COLORS["YELLOW"])
+        drawPolygon(screen, convexPolygonPoints2, COLORS["BLUE"])
+        if clipPolygonPoints is not None:
+            drawPolygon(screen, clipPolygonPoints, COLORS["GREEN"])
+
+        clipper = Segment(convexPolygonPoints[1], convexPolygonPoints[3])
+        drawLine(screen, clipper.start, clipper.end, COLORS["BLACK"], 3)
+
+        SEGMENT = clipSegment(clipper, convexPolygon2)
+        if SEGMENT is not None:
+            drawLine(screen, SEGMENT.start, SEGMENT.end, COLORS["RED"], 3)
+
+        pygame.display.update()
+        for point in convexPolygonPoints:
+            point.add(velocity)
+            if point.x >= 800 or point.y >= 800 or point.x <= 0 or point.y <= 0:
+                velocity.inverse()
+
+        for point in convexPolygonPoints2:
+            point.add(velocity2)
+            if point.x >= 800 or point.y >= 800 or point.x <= 0 or point.y <= 0:
+                velocity2.inverse()
+
+        clock.tick(FPS)

@@ -24,3 +24,10 @@ class ConvexPolygon(Polygon):
         # Лежат ли точки p1 и point по одну сторону от полученной стороны
         return edge.determinePosition(self.points[0]) * edge.determinePosition(point) > 0
     pass
+
+    def containsConvexPolygon(self, polygon: Polygon):
+        counter = 0
+        for point in polygon.points:
+            if self.contains(point):
+                counter += 1
+        return counter == len(polygon.points)

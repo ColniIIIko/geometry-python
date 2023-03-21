@@ -24,7 +24,6 @@ class Segment:
         pointB = segment1.end
         pointC = segment2.start
         pointD = segment2.end
-
         det1 = segment2.determinePosition(pointA)
         det2 = segment2.determinePosition(pointB)
         det3 = segment1.determinePosition(pointC)
@@ -49,6 +48,16 @@ class Segment:
 
         return False
 
+    @staticmethod
+    def isCollinear(segment1: Segment, segment2: Segment):
+        vector1 = segment1.toVector()
+        vector2 = segment2.toVector()
+
+        if vector2.y != 0 and vector1.y != 0:
+            return vector1.x / vector1.y == vector2.x / vector2.y
+
+        return vector2.y == vector1.y
+
     def determinePosition(self, point: Point) -> float:
         """
         Определяет положение точки относительно текущего отрезка
@@ -69,6 +78,12 @@ class Segment:
         a = self.toVector()
         b = segment.toVector()
         det = b.x * a.y - b.y * a.x
+
+        if Segment.isCollinear(self, segment):  # проверка на коллинеарность
+            checkVector = segment.end - self.end
+            cos = Vector.scalarProduct(
+                checkVector, a) / checkVector.length() / a.length()
+            return cos == 1
 
         isInside = segment.determinePosition(self.end) <= 0
         if isInside:

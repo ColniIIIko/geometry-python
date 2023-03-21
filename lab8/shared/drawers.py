@@ -13,9 +13,9 @@ def drawPoint(surface: pygame.Surface, point: Point, color: tuple):
     renderText(surface, text, Vector(point.x, point.y), color)
 
 
-def drawLine(surface: pygame.Surface, point1: Point, point2: Point, color: tuple):
+def drawLine(surface: pygame.Surface, point1: Point, point2: Point, color: tuple, width=1):
     pygame.draw.line(surface, color, (point1.x, point1.y),
-                     (point2.x, point2.y), 1)
+                     (point2.x, point2.y), width)
 
 
 def renderText(surface: pygame.Surface, text: str, position: Vector, color: tuple):
@@ -24,7 +24,8 @@ def renderText(surface: pygame.Surface, text: str, position: Vector, color: tupl
     surface.blit(text, position.toList())
 
 
-def drawPolygon(surface: pygame.Surface, points: list[Point], color: tuple):
-    for i in range(len(points)):
-        drawPoint(surface, points[i], color)
-        drawLine(surface, points[i], points[(i + 1) % len(points)], color)
+def drawPolygon(surface: pygame.Surface, points: list[Point], color: tuple, textColor=(0, 0, 0)):
+    # for i in range(len(points)):
+    #     drawPoint(surface, points[i], textColor)
+    coordsList = [point.toTuple() for point in points]
+    pygame.draw.polygon(surface, color, coordsList)
