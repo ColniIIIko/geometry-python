@@ -1,12 +1,9 @@
-import math
 from shared.point import Point
 from shared.vector import Vector
 from shared.segment import Segment
 from shared.colors import COLORS
-from shared.drawers import drawPoint
-import shared.random as rand_utils
 import pygame
-from shared.drawers import drawPoint, drawLine, drawPolygon
+from shared.drawers import drawLine, drawPolygon
 from shared.convex_polygon import ConvexPolygon
 
 
@@ -22,10 +19,11 @@ def clipSegment(segment: Segment, polygon: ConvexPolygon):
         if parameter is None:
             continue
         isIntersect = True
-        if getPointClassification(segment, polygonEdge) == 'ПВ':
+        classification = getPointClassification(segment, polygonEdge)
+        if classification == 'ПВ':
             minimalParameter = max(minimalParameter, parameter)
             pass
-        else:
+        elif classification == 'ПП':
             maximumParameter = min(maximumParameter, parameter)
             pass
 
@@ -59,7 +57,8 @@ def clipPolygon(polygonP: ConvexPolygon, polygonQ: ConvexPolygon):
     #             currentIndexQ = indexQ
 
     isOver = False
-    while not isOver:
+    i = 0
+    while not isOver and i < 2 * (len(edgesP) + len(edgesQ)):
         currentIndexQ = currentIndexQ % len(edgesQ)
         currentIndexP = currentIndexP % len(edgesP)
         currentEdgeQ = edgesQ[currentIndexQ]
@@ -87,11 +86,11 @@ def clipPolygon(polygonP: ConvexPolygon, polygonQ: ConvexPolygon):
                     currentIndexP += 1
                 else:
                     currentIndexQ += 1
-
+        i += 1
         if len(points) >= 3 and points[0] == points[-1]:
             isOver = True
 
-    return points
+    return points if len(points) != 0 else None
 
 
 def getSegmentIntersectionPoint(AB: Segment, CD: Segment) -> Point | None:
@@ -135,7 +134,7 @@ if __name__ == "__main__":
         Point(600, 453, "q0"),
         Point(414, 497, "q1"),
         Point(196, 446, "q2"),
-        Point(62, 285, "q3"),
+        Point(100, 285, "q3"),
         Point(180, 84, "q4"),
         Point(600, 100, "q5"),
         Point(650, 360, "q6"),
@@ -146,6 +145,7 @@ if __name__ == "__main__":
         Point(430, 380, "p1"),
         Point(410, 290, "p2"),
         Point(650, 253, "p3"),
+        Point(700, 400, "p3"),
     ]
 
     # screen.fill(COLORS["WHITE"])
