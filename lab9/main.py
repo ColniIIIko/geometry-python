@@ -1,6 +1,5 @@
 import math
 from shared.point import Point
-from shared.vector import Vector
 from shared.segment import Segment
 from shared.colors import COLORS
 from shared.drawers import drawPoint
@@ -8,31 +7,10 @@ import shared.random as rand_utils
 import pygame
 from shared.drawers import drawPoint, drawLine, drawPolygon
 import numpy as np
+from shared.dimensions import getDimensions, isLieInRectangle
 
-
-def getDimensions(polygon: list[Point]) -> tuple[float, float, float, float]:
-    """
-    Возвращает координаты в формате `xMin`, `xMax`, `yMin`, `yMax` прямоугольника, содержащего все точки
-    """
-    xList = [point.x for point in polygon]
-    xMax = np.max(xList)
-    xMin = np.min(xList)
-
-    yList = [point.y for point in polygon]
-    yMax = np.max(yList)
-    yMin = np.min(yList)
-
-    return xMin, xMax, yMin, yMax
-
-
-def isLieInRectangle(point: Point, xMin: float, xMax: float, yMin: float, yMax: float) -> bool:
-    """
-    Проверяет, лежит ли точка в прямоугольнике заданных характеристик
-    """
-    if point.x < xMin or point.x > xMax or point.y < yMin or point.y > yMax:
-        return False
-    else:
-        return True
+POINT_RADIUS = 5
+MAX_POINT_CHECK = 7
 
 
 def dimensionalTest(point: Point, polygon: list[Point]) -> bool:
@@ -45,7 +23,7 @@ def dimensionalTest(point: Point, polygon: list[Point]) -> bool:
 
 def drawPoints(points: list[Point]):
     for point in points:
-        drawPoint(screen, point, COLORS["BLACK"])
+        drawPoint(screen, point, COLORS["BLACK"], POINT_RADIUS)
 
 
 def findClosestPoints(points: list[Point]) -> tuple[Point, Point]:
@@ -56,20 +34,37 @@ def findClosestPoints(points: list[Point]) -> tuple[Point, Point]:
     return findRecursive(X, Y)
 
 
-def findRecursive(X: list[Point], Y: list[Point]) -> tuple[Point, Point]:
-    if len(X) <= 3:
-        minimalDistance = math.inf
-        points: tuple[Point, Point]
-        for point1 in X:
-            for point2 in X:
-                if point1 == point2:
-                    continue
-                distance = (point2 - point1).length()
-                if distance < minimalDistance:
-                    minimalDistance = distance
-                    points = (point1, point2)
+def tupleToDistance(tup: tuple[Point, Point]):
+    point1, point2 = tup
+    return (point2 - point1).length()
 
-        return points
+
+def findDistanceFull(points: list[Point]) -> tuple[Point, Point]:
+    """
+    Ищет две самые близкие точки методом полного перебора. O(n^2)
+    """
+    minimalDistance = math.inf
+    points: tuple[Point, Point]
+    for point1 in points:
+        for point2 in points:
+            if point1 == point2:
+                continue
+            distance = tupleToDistance((point1, point2))
+            if distance < minimalDistance:
+                minimalDistance = distance
+                points = (point1, point2)
+
+    return points
+
+
+def findRecursive(X: list[Point], Y: list[Point]) -> tuple[Point, Point]:
+    """
+    Рекурсивная часть алгоритма нахождения двух ближайших точек.
+    1. Для 3 и менее точек осуществляется полный перебор
+    2. Иначе производится рекурсивное деление множества
+    """
+    if len(X) <= 3:
+        return findDistanceFull(X)
 
     separator = len(X) // 2
     xLeft = X[0:separator]
@@ -88,9 +83,8 @@ def findRecursive(X: list[Point], Y: list[Point]) -> tuple[Point, Point]:
                 yRight.append(point)
     leftPoints = findRecursive(xLeft, yLeft)
     rightPoints = findRecursive(xRight, yRight)
-    delta = min(leftPoints, rightPoints,
-                key=lambda tup: (tup[1] - tup[0]).length())
-    deltaDistance = (delta[1] - delta[0]).length()
+    delta = min(leftPoints, rightPoints, key=tupleToDistance)
+    deltaDistance = tupleToDistance(delta)
     yDelta: list[Point] = []
     for point in Y:
         if abs(point.x - X[separator].x) < deltaDistance:
@@ -122,13 +116,11 @@ if __name__ == "__main__":
         Point(750, 600, "C"),
         Point(50, 600, "D")
     ]
-    RADIUS = 5
     FPS = 60
     xMin, xMax, yMin, yMax = getDimensions(rectangle)
     points: list[Point] = rand_utils.generateRandomPoints(
         24, xMin, xMax, yMin, yMax)
     velocities = [rand_utils.generateRandomVelocity() for _ in points]
-    convexHull: list[Point] = []
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -143,8 +135,6 @@ if __name__ == "__main__":
         pygame.display.update()
 
         for point, velocity in zip(points, velocities):
-            if (point == point1 or point == point2) and (point2 - point1).length() <= 2 * RADIUS:
-                velocity.inverse()
             predicted = point + velocity
             for i in range(len(rectangle)):
                 edge = Segment(
@@ -152,6 +142,9 @@ if __name__ == "__main__":
                 if edge.determinePosition(predicted) > 0:
                     velocity.reflect(edge)
                     break
+            if (point == point1 or point == point2) and (point2 - point1).length() <= 2 * POINT_RADIUS:
+                velocity.inverse()
+
             point.add(velocity)
 
         clock.tick(FPS)
