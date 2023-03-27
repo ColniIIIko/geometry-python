@@ -3,13 +3,14 @@ from shared.point import Point
 from shared.segment import Segment
 from shared.colors import COLORS
 from shared.drawers import drawPoint
+from shared.circle import Circle
 import shared.random as rand_utils
 import pygame
-from shared.drawers import drawPoint, drawLine, drawPolygon
+from shared.drawers import drawPoint, drawLine, drawPolygon, drawCircles
 import numpy as np
 from shared.dimensions import getDimensions, isLieInRectangle
 
-POINT_RADIUS = 5
+POINT_RADIUS = 25
 MAX_POINT_CHECK = 7
 
 
@@ -119,7 +120,8 @@ if __name__ == "__main__":
     FPS = 60
     xMin, xMax, yMin, yMax = getDimensions(rectangle)
     points: list[Point] = rand_utils.generateRandomPoints(
-        24, xMin, xMax, yMin, yMax)
+        6, xMin + POINT_RADIUS, xMax - POINT_RADIUS, yMin + POINT_RADIUS, yMax - POINT_RADIUS)
+    circles: list[Circle] = [Circle(point, POINT_RADIUS) for point in points]
     velocities = [rand_utils.generateRandomVelocity() for _ in points]
     while True:
         for event in pygame.event.get():
@@ -127,24 +129,26 @@ if __name__ == "__main__":
                 pygame.quit()
                 quit()
 
-        point1, point2 = findClosestPoints(points)
+        point1, point2 = findClosestPoints(
+            [circle.center for circle in circles])
         screen.fill(COLORS["WHITE"])
-        drawPoints(points)
+        drawCircles(screen, circles, COLORS["BLACK"])
         drawLine(screen, point1, point2, COLORS["RED"])
         drawPolygon(screen, rectangle, COLORS["BLACK"])
         pygame.display.update()
 
-        for point, velocity in zip(points, velocities):
-            predicted = point + velocity
+        for circle, velocity in zip(circles, velocities):
+            predicted = circle.center + velocity
             for i in range(len(rectangle)):
                 edge = Segment(
                     rectangle[i], rectangle[(i + 1) % len(rectangle)])
-                if edge.determinePosition(predicted) > 0:
+                # print(Circle(predicted, POINT_RADIUS).isPassThrough(edge))
+                if circle.isPassThrough(edge):
                     velocity.reflect(edge)
                     break
-            if (point == point1 or point == point2) and (point2 - point1).length() <= 2 * POINT_RADIUS:
+            if (circle.center == point1 or circle.center == point2) and (point2 - point1).length() <= 2 * POINT_RADIUS:
                 velocity.inverse()
 
-            point.add(velocity)
+            circle.center.add(velocity)
 
         clock.tick(FPS)

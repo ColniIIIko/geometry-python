@@ -1,9 +1,10 @@
 import pygame
 from .point import Point
 from .vector import Vector
+from .circle import Circle
 
 
-def drawPoint(surface: pygame.Surface, point: Point, color: tuple, radius = 5):
+def drawPoint(surface: pygame.Surface, point: Point, color: tuple, radius=5):
     pygame.draw.circle(surface, color, (point.x, point.y), radius)
     text = ""
     try:
@@ -28,3 +29,10 @@ def drawPolygon(surface: pygame.Surface, points: list[Point], color: tuple):
     for i in range(len(points)):
         drawPoint(surface, points[i], color)
         drawLine(surface, points[i], points[(i + 1) % len(points)], color)
+
+
+def drawCircles(surface: pygame.Surface, circles: list[Circle], color: tuple):
+    for circle in circles:
+        drawPoint(surface, circle.center, color)
+        pygame.draw.circle(
+            surface, color, circle.center.toList(), circle.radius, width=1)
