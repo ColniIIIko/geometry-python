@@ -10,7 +10,7 @@ from shared.drawers import drawPoint, drawLine, drawPolygon, drawCircles
 import numpy as np
 from shared.dimensions import getDimensions, isLieInRectangle
 
-POINT_RADIUS = 25
+POINT_RADIUS = 10
 MAX_POINT_CHECK = 7
 
 
@@ -90,19 +90,12 @@ def findRecursive(X: list[Point], Y: list[Point]) -> tuple[Point, Point]:
     for point in Y:
         if abs(point.x - X[separator].x) < deltaDistance:
             yDelta.append(point)
-
-    for point in yDelta:
-        count = 0
-        for extraPoint in yDelta:
-            if count == 7:
-                break
-            if point == extraPoint:
-                continue
-
-            distance = (extraPoint - point).length()
+    n = len(yDelta)
+    for i in range(n):
+        for j in range(i + 1, min(i + 8, n)):
+            distance = (yDelta[j] - yDelta[i]).length()
             if distance < deltaDistance:
-                delta = (point, extraPoint)
-            count += 1
+                delta = (yDelta[i], yDelta[j])
     return delta
 
 
@@ -120,7 +113,7 @@ if __name__ == "__main__":
     FPS = 60
     xMin, xMax, yMin, yMax = getDimensions(rectangle)
     points: list[Point] = rand_utils.generateRandomPoints(
-        6, xMin + POINT_RADIUS, xMax - POINT_RADIUS, yMin + POINT_RADIUS, yMax - POINT_RADIUS)
+        12, xMin + POINT_RADIUS, xMax - POINT_RADIUS, yMin + POINT_RADIUS, yMax - POINT_RADIUS)
     circles: list[Circle] = [Circle(point, POINT_RADIUS) for point in points]
     velocities = [rand_utils.generateRandomVelocity() for _ in points]
     while True:

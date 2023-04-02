@@ -1,0 +1,17 @@
+from .vector import Vector
+
+
+class Point(Vector):
+    def __init__(self, x, y, caption: str = ""):
+        super().__init__(x, y)
+        self.caption = caption
+        self.pos = 0
+
+    def __str__(self):
+        return f"Point({self.x}, {self.y}, {self.caption})"
+
+    def __repr__(self):
+        return f"Point({self.x}, {self.y}, {self.caption})"
+
+    def __sub__(self, other):
+        return Vector(self.x - other.x, self.y - other.y)
